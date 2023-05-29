@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useLocation,useSearchParams } from "react-router-dom";
-import { FetchByKeyword } from 'components/Services/Api';
+import {useSearchParams } from "react-router-dom";
+import { FetchByKeyword } from 'Services/Api';
 import Loader from 'components/Loader/Loader';
 import SearchForm from 'components/SearchForm/SearchForm';
 import MovieList from 'components/MovieList/MovieList';
@@ -10,10 +10,11 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const Movies = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const location = useLocation();
+    
     const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? '');
     const [seacrchBySet, setSeacrchBySet] = useState([]);
     const [loader, setLoader] = useState(false);
+    const [error, setError] = useState(null);
     useEffect(() => {
         if (!searchQuery) {
             return;
@@ -24,6 +25,7 @@ const Movies = () => {
 
     const SearchByWord = async (query) => {
         try {
+            setError(null);
             setLoader(true);
             const newQuery = await FetchByKeyword(query);
             if (newQuery.data.results.length === 0) {
@@ -39,18 +41,12 @@ const Movies = () => {
             setLoader(false);
             setSeacrchBySet(newQuery.data.results);
         } catch (error) {
-            setLoader(false);
-            toast.error(`We have a problem."${error}" `, {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored',
-                });
+             setLoader(false);
+            setError(error);
         }
 
     }
 
-
-    
     const onFormData = (value) => {
         setSearchParams({q: value});
         setSearchQuery(value);   
@@ -62,7 +58,8 @@ const Movies = () => {
                 <SearchForm onFormData={onFormData} />
             </Div>
             {loader && <Loader />}
-            {seacrchBySet && <MovieList List={seacrchBySet} location={location}  />}   
+            {error && <h2>{ error}</h2>}
+            {seacrchBySet.length > 0 && <MovieList List={seacrchBySet} />}   
         </>
     );
 }

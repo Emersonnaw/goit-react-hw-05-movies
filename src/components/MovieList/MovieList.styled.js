@@ -35,6 +35,7 @@ export const Img = styled.img`
 display:block;
 width:220px;
 height: 330px;
+object-fit: contain;
 `;
 
 export const DivWrapper = styled.div`
